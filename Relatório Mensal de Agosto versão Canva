@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Mensal de Incêndios - CBM PR</title>
+    
+    <!-- Open Graph Meta Tags for Social Sharing -->
+    <meta property="og:title" content="Relatório Mensal de Incêndios Florestais" />
+    <meta property="og:description" content="Análise baseada em dados consolidados de ocorrências." />
+    <meta property="og:url" content="https://g.co/gemini/share/924aee3e7ed3" />
+    <meta property="og:image" content="https://www.canva.com/design/DAGmsXQw_zA/OquJiD70oEku_ECKKC_cdA/view?utm_content=DAGmsXQw_zA&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hb6d93ad558" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chartjs-plugin-datalabels CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <style>
+        /* Estilos CSS incorporados */
+        body {
+            font-family: 'Roboto', 'Arial', sans-serif;
+            background-color: #eef2f6;
+            color: #1f2937;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Teko', 'Impact', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        /* Animação de entrada */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Estilos de cabeçalho e rodapé */
+        .header-bg {
+            background-color: #111827;
+        }
+        .footer-bg {
+            background-color: #1f2937;
+        }
+        .highlight-red {
+            color: #c0292b;
+        }
+        .bg-highlight-red {
+             background-color: #c0292b;
+        }
+        .bg-dark-blue {
+            background-color: #1e3a8a;
+        }
+        
+        /* Ajuste para altura dos gráficos */
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+
+        /* Estilo para botão de CRBM ativo */
+        .crbm-button.active {
+            background-color: #1e3a8a;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 4px solid #c0292b;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="w-full">
+
+    <!-- Cabeçalho Fixo -->
+    <header class="header-bg text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl md:text-4xl">RELATÓRIO MENSAL DE OCORRÊNCIAS FLORESTAIS</h1>
+                <p class="text-lg text-gray-300">Referência: Agosto de 2025 | Corpo de Bombeiros Militar do Paraná</p>
+            </div>
+             <!-- Brasão do Corpo de Bombeiros Militar do Paraná -->
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/CBMPR_2023.svg/1200px-CBMPR_2023.svg.png" onerror="this.onerror=null;this.src='https://placehold.co/64x64/FFFFFF/000000?text=BRASÃO';" alt="Brasão do Corpo de Bombeiros Militar do Paraná" class="w-16 h-16 hidden sm:block">
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Seção 1: Introdução e Totais -->
+        <section class="reveal my-12 text-center">
+            <h2 class="text-5xl font-bold">Visão Geral do Mês</h2>
+            <p class="text-xl mt-2 max-w-3xl mx-auto">Análise quantitativa dos incêndios registrados em Agosto de 2025, apresentando os totais e a distribuição por tipo de ocorrência.</p>
+        </section>
+        
+        <section class="reveal my-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card Total de Ocorrências -->
+                <div class="stat-card p-6 rounded-lg shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total de Ocorrências</p>
+                            <p class="text-3xl font-bold highlight-red">1,490</p>
+                        </div>
+                        <div class="text-4xl">🔥</div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">↑ 15% vs mês anterior</p>
+                </div>
+
+                <!-- Card Área Queimada -->
+                <div class="stat-card p-6 rounded-lg shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Área Queimada</p>
+                            <p class="text-3xl font-bold highlight-red">9,632 ha</p>
+                        </div>
+                        <div class="text-4xl">🌲</div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">↓ 8% vs mês anterior</p>
+                </div>
+
+                <!-- Card Tempo Médio de Resposta -->
+                <div class="stat-card p-6 rounded-lg shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Tempo Médio Resposta</p>
+                            <p class="text-3xl font-bold highlight-red">18 min</p>
+                        </div>
+                        <div class="text-4xl">⏱️</div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">↓ 2 min vs mês anterior</p>
+                </div>
+
+                <!-- Card Recursos Mobilizados -->
+                <div class="stat-card p-6 rounded-lg shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Recursos Mobilizados</p>
+                            <p class="text-3xl font-bold highlight-red">404</p>
+                        </div>
+                        <div class="text-4xl">🚒</div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">Viaturas e equipes</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 2: Filtros por CRBM -->
+        <section class="reveal my-16">
+            <h2 class="text-4xl font-bold text-center mb-8">Análise por Comando Regional</h2>
+            
+            <!-- Botões de Filtro CRBM -->
+            <div class="flex flex-wrap justify-center gap-3 mb-8">
+                <button class="crbm-button active px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors" onclick="filterByCRBM('todos')">
+                    Todos os CRBMs
+                </button>
+                <button class="crbm-button px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors" onclick="filterByCRBM('1crbm')">
+                    1º CRBM - Curitiba
+                </button>
+                <button class="crbm-button px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors" onclick="filterByCRBM('2crbm')">
+                    2º CRBM - Londrina
+                </button>
+                <button class="crbm-button px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors" onclick="filterByCRBM('3crbm')">
+                    3º CRBM - Cascavel
+                </button>
+                <button class="crbm-button px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors" onclick="filterByCRBM('4crbm')">
+                    4º CRBM - Maringá
+                </button>
+                <button class="crbm-button px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors" onclick="filterByCRBM('5crbm')">
+                    5º CRBM - Ponta Grossa
+                </button>
+            </div>
+
+            <!-- Estatísticas por CRBM -->
+            <div id="crbm-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-bold mb-2">Ocorrências</h3>
+                    <p id="crbm-occurrences" class="text-4xl font-bold highlight-red">1,490</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-bold mb-2">Área Queimada</h3>
+                    <p id="crbm-area" class="text-4xl font-bold highlight-red">9,632 ha</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-bold mb-2">Tempo Médio</h3>
+                    <p id="crbm-time" class="text-4xl font-bold highlight-red">18 min</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 3: Gráficos -->
+        <section class="reveal my-16">
+            <h2 class="text-4xl font-bold text-center mb-12">Análise Detalhada</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Gráfico de Pizza - Tipos de Ocorrência -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Distribuição por Tipo de Ocorrência</h3>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Barras - Ocorrências por CRBM -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Ocorrências por Comando Regional</h3>
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Linha - Evolução Temporal -->
+                <div class="bg-white p-6 rounded-lg shadow-lg lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Evolução das Ocorrências ao Longo do Mês</h3>
+                    <div class="chart-container">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 4: Tabela de Dados -->
+        <section class="reveal my-16">
+            <h2 class="text-4xl font-bold text-center mb-8">Dados Detalhados por Região</h2>
+            
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-highlight-red text-white">
+                            <tr>
+                                <th class="px-6 py-4 text-left">Comando Regional</th>
+                                <th class="px-6 py-4 text-center">Ocorrências</th>
+                                <th class="px-6 py-4 text-center">Área Queimada (ha)</th>
+                                <th class="px-6 py-4 text-center">Tempo Médio (min)</th>
+                                <th class="px-6 py-4 text-center">Recursos Utilizados</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 font-medium">1º CRBM - Curitiba</td>
+                                <td class="px-6 py-4 text-center">256</td>
+                                <td class="px-6 py-4 text-center">1,654</td>
+                                <td class="px-6 py-4 text-center">16</td>
+                                <td class="px-6 py-4 text-center">69</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 font-medium">2º CRBM - Londrina</td>
+                                <td class="px-6 py-4 text-center">411</td>
+                                <td class="px-6 py-4 text-center">2,658</td>
+                                <td class="px-6 py-4 text-center">19</td>
+                                <td class="px-6 py-4 text-center">112</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 font-medium">3º CRBM - Cascavel</td>
+                                <td class="px-6 py-4 text-center">228</td>
+                                <td class="px-6 py-4 text-center">1,476</td>
+                                <td class="px-6 py-4 text-center">17</td>
+                                <td class="px-6 py-4 text-center">62</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 font-medium">4º CRBM - Maringá</td>
+                                <td class="px-6 py-4 text-center">244</td>
+                                <td class="px-6 py-4 text-center">1,577</td>
+                                <td class="px-6 py-4 text-center">20</td>
+                                <td class="px-6 py-4 text-center">66</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 font-medium">5º CRBM - Ponta Grossa</td>
+                                <td class="px-6 py-4 text-center">351</td>
+                                <td class="px-6 py-4 text-center">2,267</td>
+                                <td class="px-6 py-4 text-center">18</td>
+                                <td class="px-6 py-4 text-center">95</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 5: Conclusões -->
+        <section class="reveal my-16">
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h2 class="text-4xl font-bold text-center mb-8">Conclusões e Recomendações</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 highlight-red">Principais Observações</h3>
+                        <ul class="space-y-3 text-lg">
+                            <li class="flex items-start">
+                                <span class="text-red-500 mr-2">•</span>
+                                Aumento de 15% nas ocorrências comparado ao mês anterior
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-red-500 mr-2">•</span>
+                                Redução de 8% na área total queimada
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-red-500 mr-2">•</span>
+                                Melhoria no tempo de resposta (redução de 2 minutos)
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-red-500 mr-2">•</span>
+                                2º CRBM - Londrina apresentou maior número de ocorrências (411)
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 highlight-red">Recomendações</h3>
+                        <ul class="space-y-3 text-lg">
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">•</span>
+                                Intensificar campanhas preventivas na região de Londrina
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">•</span>
+                                Manter estratégias que reduziram o tempo de resposta
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">•</span>
+                                Reforçar monitoramento em áreas de maior incidência
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">•</span>
+                                Avaliar redistribuição de recursos entre CRBMs
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="footer-bg text-white p-8 mt-16">
+        <div class="container mx-auto text-center">
+            <div class="mb-4">
+                <h3 class="text-2xl font-bold">Corpo de Bombeiros Militar do Paraná</h3>
+                <p class="text-gray-300">Protegendo vidas e patrimônios</p>
+            </div>
+            <div class="border-t border-gray-600 pt-4">
+                <p class="text-sm text-gray-400">
+                    Relatório gerado em: <span id="current-date"></span> | 
+                    Dados consolidados até: 31/08/2025
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Dados para os gráficos
+        const data = {
+            todos: {
+                occurrences: 1490,
+                area: 9632,
+                time: 18,
+                pieData: [671, 372, 223, 149, 75],
+                barData: [256, 411, 228, 244, 351]
+            },
+            '1crbm': {
+                occurrences: 256,
+                area: 1654,
+                time: 16,
+                pieData: [128, 51, 38, 26, 13],
+                barData: [256, 0, 0, 0, 0]
+            },
+            '2crbm': {
+                occurrences: 411,
+                area: 2658,
+                time: 19,
+                pieData: [185, 103, 62, 41, 20],
+                barData: [0, 411, 0, 0, 0]
+            },
+            '3crbm': {
+                occurrences: 228,
+                area: 1476,
+                time: 17,
+                pieData: [103, 57, 34, 23, 11],
+                barData: [0, 0, 228, 0, 0]
+            },
+            '4crbm': {
+                occurrences: 244,
+                area: 1577,
+                time: 20,
+                pieData: [110, 61, 37, 24, 12],
+                barData: [0, 0, 0, 244, 0]
+            },
+            '5crbm': {
+                occurrences: 351,
+                area: 2267,
+                time: 18,
+                pieData: [158, 88, 53, 35, 17],
+                barData: [0, 0, 0, 0, 351]
+            }
+        };
+
+        let currentFilter = 'todos';
+        let pieChart, barChart, lineChart;
+
+        // Função para filtrar por CRBM
+        function filterByCRBM(crbm) {
+            currentFilter = crbm;
+            
+            // Atualizar botões ativos
+            document.querySelectorAll('.crbm-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Atualizar estatísticas
+            const stats = data[crbm];
+            document.getElementById('crbm-occurrences').textContent = stats.occurrences.toLocaleString();
+            document.getElementById('crbm-area').textContent = stats.area.toLocaleString() + ' ha';
+            document.getElementById('crbm-time').textContent = stats.time + ' min';
+            
+            // Atualizar gráficos
+            updateCharts(crbm);
+        }
+
+        // Função para atualizar gráficos
+        function updateCharts(filter) {
+            const stats = data[filter];
+            
+            // Atualizar gráfico de pizza
+            pieChart.data.datasets[0].data = stats.pieData;
+            pieChart.update();
+            
+            // Atualizar gráfico de barras
+            barChart.data.datasets[0].data = stats.barData;
+            barChart.update();
+        }
+
+        // Inicializar gráficos
+        function initCharts() {
+            // Gráfico de Pizza
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Incêndio Florestal', 'Queimada Controlada', 'Incêndio Urbano', 'Incêndio Rural', 'Outros'],
+                    datasets: [{
+                        data: data.todos.pieData,
+                        backgroundColor: [
+                            '#c0292b',
+                            '#dc2626',
+                            '#ef4444',
+                            '#f87171',
+                            '#fca5a5'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: 'white',
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            formatter: (value, ctx) => {
+                                const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / sum) * 100).toFixed(1);
+                                return percentage + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+
+            // Gráfico de Barras
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1º CRBM\nCuritiba', '2º CRBM\nLondrina', '3º CRBM\nCascavel', '4º CRBM\nMaringá', '5º CRBM\nP. Grossa'],
+                    datasets: [{
+                        label: 'Ocorrências',
+                        data: data.todos.barData,
+                        backgroundColor: '#c0292b',
+                        borderColor: '#991b1b',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de Linha
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                    datasets: [{
+                        label: 'Ocorrências por Semana',
+                        data: [298, 342, 287, 320],
+                        borderColor: '#c0292b',
+                        backgroundColor: 'rgba(192, 41, 43, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#c0292b',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Animação de revelação
+        function revealElements() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            reveals.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definir data atual
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR');
+            
+            // Inicializar gráficos
+            initCharts();
+            
+            // Animação inicial
+            revealElements();
+        });
+
+        window.addEventListener('scroll', revealElements);
+    </script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9801f52bf00b5440',t:'MTc1ODA0MjQyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
