@@ -1,21 +1,2301 @@
-<html>
-    <head>
-        <title>
-            Olá, eu sou a cabeça
-        </title>
-    </head>
-    <body>
-        <h1>Eu sou o corpo </h1>
-        <h2>Eu sou o corpo </h2>
-    </body>
-    <ol>
-        <li>Cafe</li>
-        <li>Cha</li>
-        <li>Leite</li>
-    </ol>
-    <ul>
-        <li>Cafe</li>
-        <li>Cha</li>
-        <li>Leite</li>
-    </ul>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Comando e Controle - BM v2.9</title>
+    <style>
+        /* --- VARIÁVEIS & TEMAS --- */
+        :root {
+            /* Cores Institucionais */
+            --bm-red: #c0292b;
+            --bm-red-dark: #991b1b;
+            --bm-blue: #1e3a8a;
+
+            /* Tema Claro (Padrão) */
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-sec: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-card: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --filter-bg: #1e3a8a;
+            --header-bg: #ffffff;
+
+            /* Status */
+            --status-ok: #10b981;
+            --status-warn: #f59e0b;
+            --status-crit: #ef4444;
+
+            /* Viaturas & Recursos - CORES VIBRANTES (Estilo Tags) */
+            --vtr-fire: #dc2626;       /* Vermelho (Incêndio) */
+            --vtr-amb: #2563eb;        /* AZUL (Ambulância) */
+            --vtr-rescue: #ea580c;     /* LARANJA (Salvamento) */
+            --vtr-boat: #0891b2;       /* Ciano (Embarcações) */
+            --vtr-drone: #4f46e5;      /* ÍNDIGO (Drones/RPA) */
+            --vtr-k9: #d97706;         /* MARROM/AMBER (Cães/K9) */
+            --vtr-pgv: #fbbf24;        /* AMARELO (Guarda-Vidas) */
+            --vtr-special: #7e22ce;    /* Roxo (Apoio Pesado) */
+            --vtr-admin: #6b7280;      /* Cinza (Adm) */
+        }
+
+        /* Tema Escuro */
+        body.dark-mode {
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --text-main: #f3f4f6;
+            --text-sec: #9ca3af;
+            --border-color: #374151;
+            --shadow-card: 0 4px 6px -1px rgba(0,0,0,0.5);
+            --filter-bg: #1f2937;
+            --header-bg: #1f2937;
+            --bm-red: #ef4444;
+        }
+
+        /* --- GLOBAL --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 20px;
+            font-size: 14px;
+            overflow-x: hidden;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* --- TELA DE LOGIN --- */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bm-blue);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border-top: 6px solid var(--bm-red);
+        }
+
+        .login-logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .login-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-sec);
+            margin-bottom: 25px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus {
+            border-color: var(--bm-red);
+            outline: none;
+        }
+
+        .login-btn {
+            background-color: var(--bm-red);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: background-color 0.2s;
+        }
+
+        .login-btn:hover {
+            background-color: var(--bm-red-dark);
+        }
+
+        .login-error {
+            color: var(--status-crit);
+            font-size: 0.85rem;
+            margin-top: 10px;
+            display: none;
+            font-weight: 600;
+        }
+
+        /* Conteúdo Principal (oculto inicialmente) */
+        #mainContent {
+            display: none;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: var(--header-bg);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-top: 6px solid var(--bm-red);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .header-info h1 {
+            font-size: 1.5rem;
+            color: var(--bm-red);
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .header-meta {
+            color: var(--text-sec);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            background: var(--border-color);
+        }
+
+        /* Styles para os boxes do cabeçalho */
+        .info-box,
+        .alert-box {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box {
+            background-color: rgba(30, 58, 138, 0.1);
+            border: 1px solid var(--bm-blue);
+            color: var(--bm-blue);
+        }
+
+        .alert-box {
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--status-crit);
+            color: var(--status-crit);
+            display: none;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .alert-val {
+            font-weight: 800;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .alert-lbl {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        /* --- PAINEL ESTRATÉGICO --- */
+        .ops-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-card);
+            text-align: center;
+            border-bottom: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card.general {
+            border-color: var(--text-sec);
+        }
+
+        .stat-card.amb {
+            border-color: var(--vtr-amb);
+        }
+
+        .stat-card.fire {
+            border-color: var(--vtr-fire);
+        }
+
+        .stat-card.rescue {
+            border-color: var(--vtr-rescue);
+        }
+
+        .stat-card.boat {
+            border-color: var(--vtr-boat);
+        }
+
+        .stat-card.drone {
+            border-color: var(--vtr-drone);
+        }
+
+        .stat-card.k9 {
+            border-color: var(--vtr-k9);
+        }
+
+        .stat-card.pgv {
+            border-color: var(--vtr-pgv);
+        }
+
+        .stat-card.special {
+            border-color: var(--vtr-special);
+        }
+
+        .stat-val {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-sec);
+            margin-top: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            opacity: 0.1;
+            color: var(--text-main);
+        }
+
+        /* --- FILTROS --- */
+        .filters-area {
+            background: var(--filter-bg);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .filter-top-row {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 15px;
+        }
+
+        .search-input,
+        .sort-select {
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.1);
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-weight: 500;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .search-input:focus,
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--bm-red);
+            background: rgba(255,255,255,0.2);
+        }
+
+        .sort-select option {
+            background: #333;
+            color: white;
+        }
+
+        .toggles-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toggle-label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            background: rgba(255,255,255,0.08);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+            user-select: none;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .toggle-btn input {
+            display: none;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: var(--bm-blue);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            font-weight: 700;
+        }
+
+        .toggle-btn.active.t-amb {
+            color: #1e40af;
+        }
+
+        .toggle-btn.active.t-fire {
+            color: #b91c1c;
+        }
+
+        .toggle-btn.active.t-rescue {
+            color: #c2410c;
+        }
+
+        .toggle-btn.active.t-boat {
+            color: #0e7490;
+        }
+
+        .toggle-btn.active.t-drone {
+            color: #4f46e5;
+        }
+
+        .toggle-btn.active.t-k9 {
+            color: #d97706;
+        }
+
+        .toggle-btn.active.t-pgv {
+            color: #d97706;
+            border-color: #fbbf24;
+        }
+
+        .toggle-btn.active.t-pgv.active {
+            color: #b45309;
+            background: #fbbf24;
+        }
+
+        .toggle-btn.active.t-spec {
+            color: #6b21a8;
+        }
+
+        /* --- GRID --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .city-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .city-card:hover {
+            transform: translateY(-3px);
+            border-color: #9ca3af;
+        }
+
+        .city-status-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            z-index: 1;
+        }
+
+        .st-ok {
+            background-color: var(--status-ok);
+        }
+
+        .st-warn {
+            background-color: var(--status-warn);
+        }
+
+        .st-crit {
+            background-color: var(--status-crit);
+        }
+
+        .city-card.is-critical {
+            border: 1px solid var(--status-crit);
+        }
+
+        .city-card.is-critical::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.2);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .card-body {
+            padding: 15px 15px 15px 22px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .city-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .city-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .city-meta {
+            font-size: 0.75rem;
+            color: var(--text-sec);
+            margin-top: 2px;
+        }
+
+        .map-link {
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .map-link:hover {
+            background-color: var(--bg-body);
+            color: var(--bm-red);
+        }
+
+        .efetivo-badge {
+            background: var(--bg-body);
+            color: var(--text-main);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .efetivo-badge.crit {
+            color: var(--status-crit);
+            border-color: var(--status-crit);
+        }
+
+        /* Lista de Quarteis */
+        .quartel-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .quartel-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .q-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-sec);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .q-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .q-efetivo-mini {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            background: var(--bg-body);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Chips */
+        .chips-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+
+        .vtr-chip {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            letter-spacing: 0.5px;
+        }
+
+        .bg-fire {
+            background-color: var(--vtr-fire);
+        }
+
+        .bg-amb {
+            background-color: var(--vtr-amb);
+        }
+
+        .bg-rescue {
+            background-color: var(--vtr-rescue);
+        }
+
+        .bg-boat {
+            background-color: var(--vtr-boat);
+        }
+
+        .bg-drone {
+            background-color: var(--vtr-drone);
+        }
+
+        .bg-k9 {
+            background-color: var(--vtr-k9);
+        }
+
+        .bg-pgv {
+            background-color: var(--vtr-pgv);
+            color: #78350f;
+        }
+
+        .bg-special {
+            background-color: var(--vtr-special);
+        }
+
+        .bg-admin {
+            background-color: var(--vtr-admin);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 2px dashed var(--border-color);
+            color: var(--text-sec);
+            font-size: 1.1rem;
+        }
+
+        /* --- MAPA SECTION --- */
+        .map-section {
+            margin-top: 30px;
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .map-section h2 {
+            color: var(--bm-red);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            border-left: 5px solid var(--bm-red);
+            padding-left: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .responsive-map {
+            position: relative;
+            padding-bottom: 60vh;
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .responsive-map iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+                font-size: 11px;
+            }
+            .filters-area,
+            .header-controls,
+            .map-link {
+                display: none;
+            }
+            .container {
+                max-width: 100%;
+            }
+            .grid-container {
+                display: block;
+                column-count: 2;
+                gap: 15px;
+            }
+            .city-card {
+                break-inside: avoid;
+                border: 1px solid #ccc;
+                box-shadow: none;
+                margin-bottom: 15px;
+            }
+            .stat-card {
+                border: 1px solid #ccc;
+                box-shadow: none;
+            }
+            header {
+                border: none;
+                box-shadow: none;
+                padding: 10px 0;
+                margin-bottom: 10px;
+            }
+            .map-section {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filter-top-row {
+                grid-template-columns: 1fr;
+            }
+            .header-info h1 {
+                font-size: 1.2rem;
+            }
+            .toggles-row {
+                gap: 8px;
+            }
+            .toggle-btn {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+            .responsive-map {
+                padding-bottom: 75vh;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none;
+            }
+            .alert-box {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="loginOverlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+        <div class="login-card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/CBMPR_2023.svg/1200px-CBMPR_2023.svg.png"
+                 onerror="this.onerror=null;this.src='https://placehold.co/80x80/c0292b/FFFFFF?text=BM';"
+                 alt="Brasão CBMPR" class="login-logo">
+            <h2 id="loginTitle" class="login-title">Acesso Restrito</h2>
+            <p class="login-subtitle">Comando e Controle Operacional</p>
+
+            <form id="loginForm" novalidate>
+                <label for="passwordInput" class="sr-only">Senha de acesso</label>
+                <input
+                    type="password"
+                    id="passwordInput"
+                    class="login-input"
+                    placeholder="Digite a senha de acesso"
+                    autocomplete="current-password"
+                    inputmode="numeric"
+                >
+                <button type="submit" class="login-btn">Entrar</button>
+                <p id="loginError" class="login-error" role="alert" aria-live="polite">Senha incorreta. Tente novamente.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL (Protegido) -->
+    <main class="container" id="mainContent">
+
+        <!-- Cabeçalho -->
+        <header>
+            <div class="header-left">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/CBMPR_2023.svg/1200px-CBMPR_2023.svg.png"
+                     onerror="this.onerror=null;this.src='https://placehold.co/80x80/c0292b/FFFFFF?text=BM';"
+                     alt="Brasão CBMPR" class="logo-img">
+                <div class="header-info">
+                    <h1>Mapa de Força Dinâmico</h1>
+                    <div class="header-meta">
+                        <span>🗓️ 09/01/2026</span>
+                        <span>•</span>
+                        <span>Escala Oficial (Atualizada)</span>
+                        <span>•</span>
+                        <span title="Desenvolvedora">💻 Dev: Cb. QPBM Nhelyfer K Ap de Oliveira</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-controls">
+
+                <!-- Box de Total de Cidades (Separado) -->
+                <div id="totalCitiesBox" class="info-box">
+                    <span class="alert-val" id="totalCitiesDisplay">0</span>
+                    <span class="alert-lbl">CIDADES</span>
+                </div>
+
+                <!-- Box de Cidades Críticas (Separado) -->
+                <div id="criticalAlert" class="alert-box">
+                    <span class="alert-val" id="criticalCount">0</span>
+                    <span class="alert-lbl">CRÍTICOS</span>
+                </div>
+
+                <button class="action-btn" type="button" id="toggleThemeButton">
+                    <span id="darkIcon">🌙</span> <span id="darkText">Escuro</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Panel -->
+        <div class="ops-panel">
+            <div class="stat-card general">
+                <span class="stat-icon">👥</span>
+                <div class="stat-val" id="totalEfetivo">0</div>
+                <div class="stat-lbl">Efetivo Total</div>
+            </div>
+            <div class="stat-card amb">
+                <span class="stat-icon">🚑</span>
+                <div class="stat-val" id="countAmb">0</div>
+                <div class="stat-lbl">Ambulâncias</div>
+            </div>
+            <div class="stat-card fire">
+                <span class="stat-icon">🚒</span>
+                <div class="stat-val" id="countFire">0</div>
+                <div class="stat-lbl">COMBATE A INCÊNDIOS</div>
+            </div>
+            <div class="stat-card rescue">
+                <span class="stat-icon">🛟</span>
+                <div class="stat-val" id="countRescue">0</div>
+                <div class="stat-lbl">BUSCA E SALVAMENTO</div>
+            </div>
+            <div class="stat-card k9">
+                <span class="stat-icon">🐕‍🦺</span>
+                <div class="stat-val" id="countK9">0</div>
+                <div class="stat-lbl">Binômios (K9)</div>
+            </div>
+            <div class="stat-card drone">
+                <span class="stat-icon">🚁</span>
+                <div class="stat-val" id="countDrone">0</div>
+                <div class="stat-lbl">Aeronaves (RPA)</div>
+            </div>
+            <div class="stat-card boat">
+                <span class="stat-icon">🛥️</span>
+                <div class="stat-val" id="countBoat">0</div>
+                <div class="stat-lbl">Embarcações</div>
+            </div>
+            <div class="stat-card pgv">
+                <span class="stat-icon">🏊</span>
+                <div class="stat-val" id="countPGV">0</div>
+                <div class="stat-lbl">Guarda-Vidas (PGV)</div>
+            </div>
+            <div class="stat-card special">
+                <span class="stat-icon">🚜</span>
+                <div class="stat-val" id="countSpecial">0</div>
+                <div class="stat-lbl">Apoio Pesado</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-area">
+            <div class="filter-top-row">
+                <input type="text" id="filtroCidade" class="search-input" placeholder="🔎 Buscar por cidade, quartel ou viatura..." aria-label="Buscar por cidade, quartel ou viatura">
+
+                <select id="sortSelect" class="sort-select" aria-label="Ordenar resultados">
+                    <option value="nome">🔤 Nome (A-Z)</option>
+                    <option value="efetivo_asc">⚠️ Criticidade (Menor Efetivo)</option>
+                    <option value="efetivo_desc">💪 Força (Maior Efetivo)</option>
+                </select>
+            </div>
+
+            <div class="toggles-row">
+                <span class="toggle-label">Filtrar Recursos:</span>
+                <label class="toggle-btn t-amb" data-toggle="filterAmb">
+                    <input type="checkbox" id="filterAmb"> 🚑 Ambulância
+                </label>
+                <label class="toggle-btn t-fire" data-toggle="filterFire">
+                    <input type="checkbox" id="filterFire"> 🚒 Incêndio
+                </label>
+                <label class="toggle-btn t-rescue" data-toggle="filterRescue">
+                    <input type="checkbox" id="filterRescue"> 🛟 Busca e Salvamento
+                </label>
+                <label class="toggle-btn t-k9" data-toggle="filterK9">
+                    <input type="checkbox" id="filterK9"> 🐕‍🦺 Binômios (K9)
+                </label>
+                <label class="toggle-btn t-drone" data-toggle="filterDrone">
+                    <input type="checkbox" id="filterDrone"> 🚁 Drones
+                </label>
+                <label class="toggle-btn t-boat" data-toggle="filterBoat">
+                    <input type="checkbox" id="filterBoat"> 🛥️ Embarcações
+                </label>
+                <label class="toggle-btn t-pgv" data-toggle="filterPGV">
+                    <input type="checkbox" id="filterPGV"> 🏊 Guarda-Vidas
+                </label>
+                <label class="toggle-btn t-spec" data-toggle="filterSpecial">
+                    <input type="checkbox" id="filterSpecial"> 🚜 Apoio/Pesado
+                </label>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div id="listaCidades" class="grid-container"></div>
+
+        <div id="semResultados" class="no-results" style="display: none;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🔭</div>
+            Nenhum recurso encontrado com os parâmetros atuais.
+        </div>
+
+        <!-- MAPA GERAL -->
+        <div class="map-section">
+            <h2>🗺️ Mapa de Situação Operacional</h2>
+            <div class="responsive-map">
+                <iframe title="Mapa de Situação Operacional" src="https://www.google.com/maps/d/embed?mid=1BbI5g7LERAacTJyva-330q3JpQJy3hw&ll=-25.479997499999996%2C-49.29116030000001&z=8" width="640" height="480" loading="lazy"></iframe>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ==========================================
+        // CONFIGURAÇÃO DE SEGURANÇA (LOGIN)
+        // ==========================================
+        const LOGIN_CONFIG = {
+            password: '193',
+            themeStorageKey: 'bm-theme'
+        };
+
+        // FUNÇÃO DE DARK MODE GLOBAL
+        function toggleDarkMode(forceMode) {
+            const useDark = typeof forceMode === 'boolean'
+                ? forceMode
+                : !document.body.classList.contains('dark-mode');
+
+            document.body.classList.toggle('dark-mode', useDark);
+
+            const darkIcon = document.getElementById('darkIcon');
+            const darkText = document.getElementById('darkText');
+
+            if (darkIcon) darkIcon.textContent = useDark ? '☀️' : '🌙';
+            if (darkText) darkText.textContent = useDark ? 'Claro' : 'Escuro';
+
+            localStorage.setItem(LOGIN_CONFIG.themeStorageKey, useDark ? 'dark' : 'light');
+        }
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem(LOGIN_CONFIG.themeStorageKey);
+            if (savedTheme === 'dark') {
+                toggleDarkMode(true);
+            }
+        }
+
+        // ==========================================
+        // DADOS 09/01/2026 - ATUALIZADOS DO RELATÓRIO
+        // ==========================================
+        const dadosCidades = [
+            {
+                nome: "ALMIRANTE TAMANDARE",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Almirante Tamandare", efetivo: 5, viaturas: "AA 0249, ABTR 0211" }
+                ]
+            },
+            {
+                nome: "ALTÔNIA",
+                totalEfetivo: 3,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Altônia", efetivo: 3, viaturas: "ABT 41, ABTR 0177" }
+                ]
+            },
+            {
+                nome: "AMPÉRE",
+                totalEfetivo: 3,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "BC Ampere", efetivo: 3, viaturas: "ABTBC 0124, ABTDC 0029" }
+                ]
+            },
+            {
+                nome: "ANDIRÁ",
+                totalEfetivo: 2,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "BC Andirá", efetivo: 2, viaturas: "ABTBC 126, ABTDC 26" }
+                ]
+            },
+            {
+                nome: "ANTONINA",
+                totalEfetivo: 17,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "CB Antonina", efetivo: 6, viaturas: "AA 11588, ABTR BM 13755" },
+                    { nome: "PGV Antonina", efetivo: 11, viaturas: "PGV Rio do Nunes, PGV Tático Móvel" }
+                ]
+            },
+            {
+                nome: "APUCARANA",
+                totalEfetivo: 11,
+                totalViaturas: 5,
+                quarteis: [
+                    { nome: "Quartel Central", efetivo: 11, viaturas: "AA 10498, ABS 15834, ABS 11790, ABTR BM 0174, ATP 10838" }
+                ]
+            },
+            {
+                nome: "ARAPONGAS",
+                totalEfetivo: 6,
+                totalViaturas: 4,
+                quarteis: [
+                    { nome: "PB Arapongas", efetivo: 6, viaturas: "AA BM 00027, ABS 11821, ABTR 14966, AT 00079" }
+                ]
+            },
+            {
+                nome: "ARAPOTI",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Arapoti", efetivo: 2, viaturas: "ABTBC 0167" }
+                ]
+            },
+            {
+                nome: "ARAUCARIA",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Pq. Cachoeira", efetivo: 2, viaturas: "AA 16223" },
+                    { nome: "PB Thomaz Coelho", efetivo: 3, viaturas: "ABTR 14454" }
+                ]
+            },
+            {
+                nome: "ASSAÍ",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "BC Assaí", efetivo: 4, viaturas: "ABTDC 57, ATP 9781" }
+                ]
+            },
+            {
+                nome: "ASSIS CHATEAUBRIAND",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "PBC Assis Chat.", efetivo: 2, viaturas: "ABTBC 0123" }
+                ]
+            },
+            {
+                nome: "ASTORGA",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "BC Astorga", efetivo: 4, viaturas: "AADC SAMU, ABTDC 39, ATP 10776" }
+                ]
+            },
+            {
+                nome: "BANDEIRANTES",
+                totalEfetivo: 6,
+                totalViaturas: 5,
+                quarteis: [
+                    { nome: "PB Bandeirantes", efetivo: 6, viaturas: "AA 10496, ABS BM 00015, ABTR 8731, ABTR BM 14955" }
+                ]
+            },
+            {
+                nome: "BELA VISTA DO PARAÍSO",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "BC Bela Vista", efetivo: 4, viaturas: "ABS BM 9824, ABTDC 75, ATP BM 14623" }
+                ]
+            },
+            {
+                nome: "CAMBARÁ",
+                totalEfetivo: 4,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Cambará", efetivo: 4, viaturas: "ABTBC 161" }
+                ]
+            },
+            {
+                nome: "CAMBÉ",
+                totalEfetivo: 6,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Cambé", efetivo: 6, viaturas: "AA BM 00253, ABS BM 00185, ABTR BM 00204" }
+                ]
+            },
+            {
+                nome: "CAMPINA GRANDE DO SUL",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Campina G. Sul", efetivo: 5, viaturas: "AA 14922, ABTR BM 0149" }
+                ]
+            },
+            {
+                nome: "CAMPO LARGO",
+                totalEfetivo: 6,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Campo Largo", efetivo: 6, viaturas: "AA BM025, ABTR 14959" }
+                ]
+            },
+            {
+                nome: "CAMPO MOURÃO",
+                totalEfetivo: 10,
+                totalViaturas: 7,
+                quarteis: [
+                    { nome: "PB Campo Mourão", efetivo: 10, viaturas: "AA 14889, AA BM 0119, ABS 11773, ABS BM 0197, ABT 11378, ABT 1518, ABTR 10900, ABTR BM 0212" }
+                ]
+            },
+            {
+                nome: "CANDOI",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Candói", efetivo: 2, viaturas: "ABTBC 0123" }
+                ]
+            },
+            {
+                nome: "CAPANEMA",
+                totalEfetivo: 6,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Capanema", efetivo: 6, viaturas: "AA BM 0251, ABT 13767, ABTDC 0030" }
+                ]
+            },
+            {
+                nome: "CAPITÃO LEONIDAS MARQUES",
+                totalEfetivo: 1,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "PBC Capitão L. M.", efetivo: 1, viaturas: "ABTBC 0228" }
+                ]
+            },
+            {
+                nome: "CARAMBEÍ",
+                totalEfetivo: 8,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Carambeí", efetivo: 8, viaturas: "ABTDC 0052" }
+                ]
+            },
+            {
+                nome: "CASCAVEL",
+                totalEfetivo: 25,
+                totalViaturas: 11,
+                quarteis: [
+                    { nome: "QC Cascavel", efetivo: 13, viaturas: "AA BM 0141, ABS 0084, ABS 0050, ABTR 15223, CT BM 0110, K9 Sherlock" },
+                    { nome: "PB Ten. Edy", efetivo: 6, viaturas: "AA BM 00074, ABTR 14461, ATM 9195" },
+                    { nome: "PB Cabo Bonatto", efetivo: 6, viaturas: "AA BM 00074, ABS 15840, ABTR BM 0203, RPA Mavic 3T" }
+                ]
+            },
+            {
+                nome: "CASTRO",
+                totalEfetivo: 7,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Castro", efetivo: 7, viaturas: "AA BM 00040, ABS BM 0132, ABTR 10913, ABTR BM 0232" }
+                ]
+            },
+            {
+                nome: "CHOPINZINHO",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Chopinzinho", efetivo: 3, viaturas: "ABT BC 0395" }
+                ]
+            },
+            {
+                nome: "CIANORTE",
+                totalEfetivo: 6,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Cianorte", efetivo: 6, viaturas: "AA 00075, ABTR 8745, K9 Horus, K9 Taz" }
+                ]
+            },
+            {
+                nome: "CLEVELÂNDIA",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Clevelândia", efetivo: 3, viaturas: "ABTBC-0127" }
+                ]
+            },
+            {
+                nome: "COLOMBO",
+                totalEfetivo: 10,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB São Gabriel", efetivo: 7, viaturas: "AABM 00038, ABS 15822, ABTR 13764" },
+                    { nome: "PB São Dimas", efetivo: 3, viaturas: "AA 11586" }
+                ]
+            },
+            {
+                nome: "CORBÉLIA",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "PBC Corbélia", efetivo: 3, viaturas: "ABTDC 0061" }
+                ]
+            },
+            {
+                nome: "CORNÉLIO PROCÓPIO",
+                totalEfetivo: 5,
+                totalViaturas: 4,
+                quarteis: [
+                    { nome: "PB Cornélio Procópio", efetivo: 5, viaturas: "AA BM 00255, ABS 15830, ABTR 7791, ABTR BM 00207" }
+                ]
+            },
+            {
+                nome: "CORONEL VIVIDA",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Coronel Vivida", efetivo: 4, viaturas: "AABM 00021, ABTR 10908" }
+                ]
+            },
+            {
+                nome: "CRUZEIRO DO OESTE",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Cruzeiro do Oeste", efetivo: 4, viaturas: "ABS 0055, ABS 10732, ABT 14935" }
+                ]
+            },
+            {
+                nome: "CURITIBA",
+                totalEfetivo: 65,
+                totalViaturas: 20,
+                quarteis: [
+                    { nome: "COBOM (Central de Operações)", efetivo: 15, viaturas: "Coordenação Operacional" },
+                    { nome: "PB Cabral", efetivo: 1, viaturas: "ABT-APOIO 11007" },
+                    { nome: "PB Bairro Alto", efetivo: 5, viaturas: "AA BM 0143, ABTR 8750" },
+                    { nome: "PB Pilarzinho", efetivo: 4, viaturas: "ABTR 00153" },
+                    { nome: "PB Santa Felicidade", efetivo: 6, viaturas: "AA 11587, ABT 14459" },
+                    { nome: "QC Portão", efetivo: 8, viaturas: "AA 14062, ABTR 14863, CT 4496" },
+                    { nome: "Sede 2º SGB", efetivo: 9, viaturas: "AABM 00076, ABS 15810, ABTR 10899, APM 14029" },
+                    { nome: "PB Sitio Cercado", efetivo: 6, viaturas: "AA 14921, ABTR 00150" },
+                    { nome: "PB CIC", efetivo: 5, viaturas: "ABTR BM 0282, B 12" },
+                    { nome: "PB Boqueirão", efetivo: 6, viaturas: "AA 14059, ABTR BM 0170" },
+                    { nome: "Quartel do GOST", efetivo: 7, viaturas: "ABS 13825, ABS 15845, RPA Matrice 300 RTK, K9 Skull, K9 Conor, K9 Bruce, K9 Hórus, K9 Meghan, K9 Diana, K9 Amora, K9 Gaia, K9 Zyah, K9 Mali, K9 Nutella, K9 Raio" }
+                ]
+            },
+            {
+                nome: "DOIS VIZINHOS",
+                totalEfetivo: 5,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Dois Vizinhos", efetivo: 5, viaturas: "AA BM 0028, ABT 14458, ABTR 8735" }
+                ]
+            },
+            {
+                nome: "FAZENDA RIO GRANDE",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Fazenda Rio Grande", efetivo: 4, viaturas: "AA 00044, ABTR 0213" }
+                ]
+            },
+            {
+                nome: "FOZ DO IGUAÇU",
+                totalEfetivo: 20,
+                totalViaturas: 11,
+                quarteis: [
+                    { nome: "PB Vila A", efetivo: 10, viaturas: "AA 0160, ABS 15842, ABS 15852, ABTR 14867, LBS 001, K9 Bravo, RPA Mavic 2 Dual" },
+                    { nome: "PB Maracanã", efetivo: 6, viaturas: "AA 0235, ABS 9834, ABTR 14963, ATF 15880" },
+                    { nome: "PB Vanderlei Rissardi", efetivo: 4, viaturas: "AA 0236, ABTF 15885" }
+                ]
+            },
+            {
+                nome: "FRANCISCO BELTRÃO",
+                totalEfetivo: 8,
+                totalViaturas: 5,
+                quarteis: [
+                    { nome: "CB Francisco Beltrão", efetivo: 6, viaturas: "ABS 15843, ABTR 14964, ATF 15879" },
+                    { nome: "PB Cidade Norte", efetivo: 2, viaturas: "AA BM 0142, ABTR 8734" }
+                ]
+            },
+            {
+                nome: "GENERAL CARNEIRO",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC General Carneiro", efetivo: 3, viaturas: "ABT DC 0000" }
+                ]
+            },
+            {
+                nome: "GOIOERÊ",
+                totalEfetivo: 6,
+                totalViaturas: 5,
+                quarteis: [
+                    { nome: "PB Goioerê", efetivo: 6, viaturas: "AADC 150, ABS 9827, ABS BM 0257, ABT 14913, ABT BC 0267" }
+                ]
+            },
+            {
+                nome: "GUAÍRA",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "QC de Guaíra", efetivo: 4, viaturas: "ABT 11530, ABTF 15884, ABTR BM 0152" }
+                ]
+            },
+            {
+                nome: "GUARANIAÇU",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PBC Guaraniaçu", efetivo: 4, viaturas: "ABTBC 0129, ABTDC 0033" }
+                ]
+            },
+            {
+                nome: "GUARAPUAVA",
+                totalEfetivo: 8,
+                totalViaturas: 4,
+                quarteis: [
+                    { nome: "QC de Guarapuava", efetivo: 6, viaturas: "AA 14961, ABS 15813, ABTR 0206" },
+                    { nome: "PB Primavera", efetivo: 2, viaturas: "ABTR 0120" }
+                ]
+            },
+            {
+                nome: "GUARATUBA",
+                totalEfetivo: 140,
+                totalViaturas: 5,
+                quarteis: [
+                    { nome: "CB Guaratuba", efetivo: 8, viaturas: "AA 0073, ABTR 8753, ABTR BM 0173, DRONE GUARATUBA" },
+                    { nome: "BNBS do 3º SGB", efetivo: 3, viaturas: "LBS 199, MAS 0098" },
+                    { nome: "Postos Guarda-Vidas (PGV)", efetivo: 129, viaturas: "PGV Av. Ponta Grossa, PGV Barra do Saí, PGV Barra Vento, PGV Brejatuba I, PGV Brejatuba II, PGV Caieiras I, PGV Caieiras II, PGV Candeias, PGV Central, PGV Coroados I, PGV Coroados II, PGV Coroados III, PGV Cristo, PGV Curaçao, PGV Eliane, PGV Fox, PGV Magistrados, PGV Mar Doce, PGV Nereidas I, PGV Nereidas II, PGV Nereidas III, PGV Pousada, PGV Praça dos Paraguaios, PGV Rio da Barra, PGV Rota do Sol, PGV Santa Paula, PGV Thalia, PGV Vila Real, PGV Vô Fredo, PGV Volta das Canoas" }
+                ]
+            },
+            {
+                nome: "IBAITI",
+                totalEfetivo: 3,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Ibaiti", efetivo: 3, viaturas: "AA 00046, ABS BM 0263, ABT 13756" }
+                ]
+            },
+            {
+                nome: "IBIPORA",
+                totalEfetivo: 7,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Ibiporã", efetivo: 7, viaturas: "AA 14887, ABTR BM 00233" }
+                ]
+            },
+            {
+                nome: "IMBITUVA",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Imbituva", efetivo: 2, viaturas: "ABTDC 0053" }
+                ]
+            },
+            {
+                nome: "IRATI",
+                totalEfetivo: 10,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Irati", efetivo: 10, viaturas: "AA 00041, ABS 15841, ABTR-0208" }
+                ]
+            },
+            {
+                nome: "IVAIPORÃ",
+                totalEfetivo: 10,
+                totalViaturas: 5,
+                quarteis: [
+                    { nome: "PB Ivaiporã", efetivo: 10, viaturas: "AA 10874, AA BM 00038, ABTR 8739, ABTR BM 0151, ATP 13299" }
+                ]
+            },
+            {
+                nome: "JACAREZINHO",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Jacarezinho", efetivo: 5, viaturas: "AA 00026, ABTR BM 0175" }
+                ]
+            },
+            {
+                nome: "JAGUARIAIVA",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Jaguariaíva", efetivo: 5, viaturas: "AABM 00046, ABTR BM 0148" }
+                ]
+            },
+            {
+                nome: "JANDAIA DO SUL",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PBC Jandaia do Sul", efetivo: 4, viaturas: "AA 20001, ABTBC 0121" }
+                ]
+            },
+            {
+                nome: "LAPA",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Lapa", efetivo: 4, viaturas: "AA 00034, ABS 15818, ABT 14936" }
+                ]
+            },
+            {
+                nome: "LARANJEIRAS DO SUL",
+                totalEfetivo: 6,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Laranjeiras do Sul", efetivo: 6, viaturas: "AA 00065, ABS 11791, ABTR 10906" }
+                ]
+            },
+            {
+                nome: "LOANDA",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Loanda", efetivo: 4, viaturas: "ABS 0179, ABT 14457" }
+                ]
+            },
+            {
+                nome: "LONDRINA",
+                totalEfetivo: 25,
+                totalViaturas: 14,
+                quarteis: [
+                    { nome: "PB Zona Sul", efetivo: 5, viaturas: "AA BM 00256, ABTR 11760" },
+                    { nome: "QC Londrina", efetivo: 17, viaturas: "AA BM 00052, AA BM 00070, AA BM 00118, AA BM 00240, ABS 11175, ABS 11756, ABS 15827, ABTR 11761, CT 11536, K9 Luke, RPA Mavic 2 Enterprise" },
+                    { nome: "PB Zona Norte", efetivo: 3, viaturas: "ABTR 14464" }
+                ]
+            },
+            {
+                nome: "MALLET",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Mallet", efetivo: 3, viaturas: "ABTDC 001" }
+                ]
+            },
+            {
+                nome: "MANDAGUARI",
+                totalEfetivo: 3,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "1° PBM", efetivo: 3, viaturas: "AA 14879, ABTR 10916" }
+                ]
+            },
+            {
+                nome: "MANOEL RIBAS",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "BC Manoel Ribas", efetivo: 4, viaturas: "AA 14925, ABTBM 00000" }
+                ]
+            },
+            {
+                nome: "MARECHAL CÂNDIDO RONDON",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "QC Marechal C. Rondon", efetivo: 4, viaturas: "AA 14065, ABT 14041, ATF 15881" }
+                ]
+            },
+            {
+                nome: "MARIALVA",
+                totalEfetivo: 6,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "BC Marialva", efetivo: 6, viaturas: "AADC 152, ABTDC 16, ABTRDC 23" }
+                ]
+            },
+            {
+                nome: "MARINGÁ",
+                totalEfetivo: 16,
+                totalViaturas: 7,
+                quarteis: [
+                    { nome: "QC de Maringá", efetivo: 12, viaturas: "AA 0248, ABS BM 0086, ABTR BM 0281, APM 14028, ATP 9578, CT 12397" },
+                    { nome: "PB Jardim Alvorada", efetivo: 2, viaturas: "ABTR 13321" },
+                    { nome: "PB Maringá Velho", efetivo: 2, viaturas: "ABTR 13320" }
+                ]
+            },
+            {
+                nome: "MATINHOS",
+                totalEfetivo: 125,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "CB Matinhos", efetivo: 8, viaturas: "AA 0033, ABTR 14965, MAS 0096, DRONE MATINHOS" },
+                    { nome: "Postos Guarda-Vidas (PGV)", efetivo: 117, viaturas: "PGV Albatroz, PGV Associação, PGV Av. Curitiba, PGV Betaras, PGV Caiobá, PGV Caiobá II, PGV Camping, PGV Costa Azul, PGV Currais, PGV Flórida, PGV Gaivotas I, PGV Gaivotas II, PGV Inajá, PGV Ipacaraí, PGV Junara, PGV Marajó, PGV Matinhos, PGV Pipeline, PGV Pipeline II, PGV Praia Brava, PGV Praia Grande I, PGV Praia Grande II, PGV Praia Grande III, PGV Praia Mansa, PGV Praia Mansa II, PGV Prainha, PGV Riviera I, PGV Riviera II, PGV Riviera III, PGV Saint Ethiene, PGV Sesc, PGV Solimar, PGV Terminal Turístico, PGV Trombeta, PGV UFPR" }
+                ]
+            },
+            {
+                nome: "MAUA DA SERRA",
+                totalEfetivo: 3,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "3º PBM", efetivo: 3, viaturas: "AA 11598, ABT 13765" }
+                ]
+            },
+            {
+                nome: "MEDIANEIRA",
+                totalEfetivo: 10,
+                totalViaturas: 4,
+                quarteis: [
+                    { nome: "PB Medianeira", efetivo: 10, viaturas: "AA 0238, ABT 13628, ABT 14915, ABTF 15886" }
+                ]
+            },
+            {
+                nome: "MORRETES",
+                totalEfetivo: 25,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "CB Morretes", efetivo: 6, viaturas: "AA 14893, ABTR 8741" },
+                    { nome: "Postos Guarda-Vidas (PGV)", efetivo: 19, viaturas: "PGV Morretes, PGV Curva do Félix, PGV Ponte de Ferro, PGV Ponte Molhada, PGV Porto de Cima, Tático Móvel Morretes" }
+                ]
+            },
+            {
+                nome: "NOVA AURORA",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "PBC Nova Aurora", efetivo: 2, viaturas: "ABTDC 0062" }
+                ]
+            },
+            {
+                nome: "NOVA ESPERANÇA",
+                totalEfetivo: 6,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "BC Nova Esperança", efetivo: 6, viaturas: "AADC 01, ABTDC 50, ABTRDC 05" }
+                ]
+            },
+            {
+                nome: "NOVA LONDRINA",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Nova Londrina", efetivo: 3, viaturas: "ABTDC NL" }
+                ]
+            },
+            {
+                nome: "PALMAS",
+                totalEfetivo: 5,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Palmas", efetivo: 5, viaturas: "AA 14924, ABT 13770, ABT 4504" }
+                ]
+            },
+            {
+                nome: "PALMEIRA",
+                totalEfetivo: 5,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Palmeira", efetivo: 5, viaturas: "AA 0069, ABS 8708, ABTR BM 0171" }
+                ]
+            },
+            {
+                nome: "PALOTINA",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "QC de Palotina", efetivo: 4, viaturas: "ABT 11762, ABTR 11823" }
+                ]
+            },
+            {
+                nome: "PARANAGUÁ",
+                totalEfetivo: 40,
+                totalViaturas: 9,
+                quarteis: [
+                    { nome: "CB Nilson Neves", efetivo: 14, viaturas: "AA 16249, ABS BML 013, ABTR 14866, AT 0083" },
+                    { nome: "CB Costeira", efetivo: 7, viaturas: "ABS 14940, ABS BM 0187, ABTR 0201, LBS 13, LBS 199, MAS 15203" },
+                    { nome: "PGV Ilha do Mel", efetivo: 19, viaturas: "PGV Brasília, PGV Encantadas, PGV Paralelas, PGV Praia de Fora" }
+                ]
+            },
+            {
+                nome: "PARANAVAÍ",
+                totalEfetivo: 7,
+                totalViaturas: 4,
+                quarteis: [
+                    { nome: "PB Paranavaí", efetivo: 7, viaturas: "AA BM 0134, ABS 14978, ABT 4625, ABTR 0209" }
+                ]
+            },
+            {
+                nome: "PATO BRANCO",
+                totalEfetivo: 6,
+                totalViaturas: 5,
+                quarteis: [
+                    { nome: "QCI Pato Branco", efetivo: 4, viaturas: "AA 0030, ABS 15809, ABS 4571, ABTR 14930, AT 0081" },
+                    { nome: "PB Alvorada", efetivo: 2, viaturas: "AA 16224, ABTR 0215" }
+                ]
+            },
+            {
+                nome: "PIÊN",
+                totalEfetivo: 3,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Piên", efetivo: 3, viaturas: "ABS 9829, ABTBC 0283" }
+                ]
+            },
+            {
+                nome: "PINHAIS",
+                totalEfetivo: 5,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Pinhais", efetivo: 5, viaturas: "AA 14960, ABS 11775, AT 0082" }
+                ]
+            },
+            {
+                nome: "PINHÃO",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "BC Pinhão", efetivo: 4, viaturas: "AA 596, ABT BC 0122" }
+                ]
+            },
+            {
+                nome: "PIRAÍ DO SUL",
+                totalEfetivo: 2,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "BC Piraí do Sul", efetivo: 2, viaturas: "ABT BC 0168, ABTDC 0010" }
+                ]
+            },
+            {
+                nome: "PIRAQUARA",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Piraquara", efetivo: 4, viaturas: "AA BM 0243, ABTR 8740" }
+                ]
+            },
+            {
+                nome: "PITANGA",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Pitanga", efetivo: 5, viaturas: "AA 0137, ABT 14916" }
+                ]
+            },
+            {
+                nome: "PONTA GROSSA",
+                totalEfetivo: 17,
+                totalViaturas: 7,
+                quarteis: [
+                    { nome: "QC Ponta Grossa", efetivo: 11, viaturas: "AA BM 0244, ABS 14909, ABS 15807, ABTR 14463, APC 11308, AT 0080" },
+                    { nome: "PB Nova Rússia", efetivo: 3, viaturas: "ABTR BM 0279" },
+                    { nome: "PB Uvaranas", efetivo: 3, viaturas: "ABTR BM 0214" }
+                ]
+            },
+            {
+                nome: "PONTAL DO PARANÁ",
+                totalEfetivo: 130,
+                totalViaturas: 7,
+                quarteis: [
+                    { nome: "CB Pontal do Paraná", efetivo: 15, viaturas: "AA 0039, ABS BML 014, ABTR 00147, APC 11320, MAS 0094, MAS 0095, DRONE PONTAL DO PARANÁ" },
+                    { nome: "Postos Guarda-Vidas (PGV)", efetivo: 115, viaturas: "PGV Assenodí, PGV Atami Sul, PGV AVM, PGV Banestado, PGV Canoas I, PGV Canoas II, PGV Canoas III, PGV Carmeri, PGV Grajaú, PGV Guapê, PGV Guarapari, PGV Ipanema I, PGV Ipanema II, PGV Ipanema III, PGV Jardim Canadá, PGV Leblon, PGV Leste I, PGV Leste II, PGV Leste III, PGV Marisol, PGV Monções I, PGV Monções II, PGV Pontal I, PGV Pontal II, PGV Primavera, PGV Privê, PGV Shangri-lá I, PGV Shangri-lá II, PGV Shangri-lá III, PGV Santa Terezinha I, PGV Santa Terezinha II, PGV Trapiche" }
+                ]
+            },
+            {
+                nome: "PRUDENTÓPOLIS",
+                totalEfetivo: 6,
+                totalViaturas: 4,
+                quarteis: [
+                    { nome: "PB Prudentópolis", efetivo: 6, viaturas: "AA-0045, ABS 11437, ABT 14934, ABTR 8759" }
+                ]
+            },
+            {
+                nome: "QUEDAS DO IGUAÇU",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "PBC Quedas do Iguaçu", efetivo: 2, viaturas: "ABTDC 0127" }
+                ]
+            },
+            {
+                nome: "QUERÊNCIA DO NORTE",
+                totalEfetivo: 4,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Querência do Norte", efetivo: 4, viaturas: "ABTDC 66" }
+                ]
+            },
+            {
+                nome: "REALEZA",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Realeza", efetivo: 2, viaturas: "ABTDC 5198" }
+                ]
+            },
+            {
+                nome: "REBOUÇAS",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Rebouças", efetivo: 3, viaturas: "ABTDC 0020" }
+                ]
+            },
+            {
+                nome: "RESERVA",
+                totalEfetivo: 4,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Reserva", efetivo: 4, viaturas: "ABTDC 0154" }
+                ]
+            },
+            {
+                nome: "RIO BRANCO DO SUL",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Rio Branco do Sul", efetivo: 3, viaturas: "ABTBC 0159" }
+                ]
+            },
+            {
+                nome: "RIO NEGRO",
+                totalEfetivo: 4,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Rio Negro", efetivo: 4, viaturas: "AA 14891, ABTR 0172" }
+                ]
+            },
+            {
+                nome: "ROLÂNDIA",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Rolândia", efetivo: 4, viaturas: "AA BM 00254, ABS 15823, ABTR 14967" }
+                ]
+            },
+            {
+                nome: "RONCADOR",
+                totalEfetivo: 3,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "BC Roncador", efetivo: 3, viaturas: "AADC 5751, ABTDC 67" }
+                ]
+            },
+            {
+                nome: "SALTO DO LONTRA",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Salto do Lontra", efetivo: 2, viaturas: "ABTDC 0063" }
+                ]
+            },
+            {
+                nome: "SANTA HELENA",
+                totalEfetivo: 5,
+                totalViaturas: 6,
+                quarteis: [
+                    { nome: "PB Santa Helena", efetivo: 5, viaturas: "ABTDC 0227, ABTF 15887, ABTR 10905, BIS 01, MAS 15222" }
+                ]
+            },
+            {
+                nome: "SANTA TEREZINHA DE ITAIPU",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB S. Terezinha Itaipu", efetivo: 4, viaturas: "AA 0239, ABTR 8736, ATF 15882" }
+                ]
+            },
+            {
+                nome: "SANTO ANTÔNIO DA PLATINA",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Sto. Ant. Platina", efetivo: 5, viaturas: "AA 14896, ABTR 14869" }
+                ]
+            },
+            {
+                nome: "SANTO ANTÔNIO DO SUDOESTE",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Santo Antonio do Sudoeste", efetivo: 2, viaturas: "ABTDC 8J41" }
+                ]
+            },
+            {
+                nome: "SAO JORGE D'OESTE",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC São Jorge D'Oeste", efetivo: 2, viaturas: "ABTDC 0064" }
+                ]
+            },
+            {
+                nome: "SÃO JOSÉ DOS PINHAIS",
+                totalEfetivo: 9,
+                totalViaturas: 6,
+                quarteis: [
+                    { nome: "QC Afonso Pena", efetivo: 9, viaturas: "AA 00033, AA 16245, ABS 15826, ABTR 10898, AT 0082, MP 000" }
+                ]
+            },
+            {
+                nome: "SÃO MATEUS DO SUL",
+                totalEfetivo: 5,
+                totalViaturas: 6,
+                quarteis: [
+                    { nome: "PB São Mateus do Sul", efetivo: 5, viaturas: "AA 0024, ABS 0014, ABS 10828, ABTR 14957, ABTR 7790" }
+                ]
+            },
+            {
+                nome: "SÃO MIGUEL DO IGUAÇU",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB São Miguel do Iguaçu", efetivo: 5, viaturas: "AA 0241, ABT 13766" }
+                ]
+            },
+            {
+                nome: "SARANDI",
+                totalEfetivo: 4,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB Sarandi", efetivo: 4, viaturas: "AA BM 0117, ABS 15833, ABTR BM 0205" }
+                ]
+            },
+            {
+                nome: "SIQUEIRA CAMPOS",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Siqueira Campos", efetivo: 2, viaturas: "ABTBC 0278" }
+                ]
+            },
+            {
+                nome: "TELÊMACO BORBA",
+                totalEfetivo: 5,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "PB Telêmaco Borba", efetivo: 5, viaturas: "AA 14064, ABTR 14956" }
+                ]
+            },
+            {
+                nome: "TERRA RICA",
+                totalEfetivo: 2,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Terra Rica", efetivo: 2, viaturas: "ABTDC 68" }
+                ]
+            },
+            {
+                nome: "TIBAGI",
+                totalEfetivo: 3,
+                totalViaturas: 1,
+                quarteis: [
+                    { nome: "BC Tibagi", efetivo: 3, viaturas: "ABT BC 0125" }
+                ]
+            },
+            {
+                nome: "TOLEDO",
+                totalEfetivo: 7,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "QC de Toledo", efetivo: 5, viaturas: "AA BM 00071, ABTR 10909" },
+                    { nome: "PB Satélite", efetivo: 2, viaturas: "AA 14872" }
+                ]
+            },
+            {
+                nome: "UBIRATA",
+                totalEfetivo: 2,
+                totalViaturas: 2,
+                quarteis: [
+                    { nome: "BC Ubirata", efetivo: 2, viaturas: "ABTDC 65, ATP 12438" }
+                ]
+            },
+            {
+                nome: "UMUARAMA",
+                totalEfetivo: 9,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "QC de Umuarama", efetivo: 9, viaturas: "AA BM 0020, ABS 0055, ABTR 14462" }
+                ]
+            },
+            {
+                nome: "UNIÃO DA VITÓRIA",
+                totalEfetivo: 5,
+                totalViaturas: 3,
+                quarteis: [
+                    { nome: "PB União da Vitória", efetivo: 5, viaturas: "AA 14066, ABS 11767, ABT 13769" }
+                ]
+            }
+        ];
+
+        // FUNÇÃO DE RENDERIZAÇÃO PRINCIPAL (Definida antes de ser chamada)
+        function renderizarCidades() {
+            const listaCidadesDiv = document.getElementById('listaCidades');
+            const semResultadosDiv = document.getElementById('semResultados');
+
+            // Verificação de segurança adicional para elementos DOM
+            const filtroInput = document.getElementById('filtroCidade');
+            const sortSelect = document.getElementById('sortSelect');
+
+            const termo = filtroInput ? filtroInput.value.toLowerCase() : "";
+            const sortMode = sortSelect ? sortSelect.value : "nome";
+
+            // Recriar o objeto filters para garantir referências atuais
+            const filters = {
+                amb: document.getElementById('filterAmb'),
+                fire: document.getElementById('filterFire'),
+                rescue: document.getElementById('filterRescue'),
+                boat: document.getElementById('filterBoat'),
+                spec: document.getElementById('filterSpecial'),
+                drone: document.getElementById('filterDrone'),
+                k9: document.getElementById('filterK9'),
+                pgv: document.getElementById('filterPGV')
+            };
+
+            // Filtros Ativos (com segurança)
+            const activeFilters = {
+                amb: filters.amb ? filters.amb.checked : false,
+                fire: filters.fire ? filters.fire.checked : false,
+                rescue: filters.rescue ? filters.rescue.checked : false,
+                boat: filters.boat ? filters.boat.checked : false,
+                spec: filters.spec ? filters.spec.checked : false,
+                drone: filters.drone ? filters.drone.checked : false,
+                k9: filters.k9 ? filters.k9.checked : false,
+                pgv: filters.pgv ? filters.pgv.checked : false
+            };
+
+            // Filtragem
+            let cidadesFiltradas = dadosCidades.filter(cidade => {
+                // 1. Texto
+                const matchText = cidade.nome.toLowerCase().includes(termo) ||
+                                  cidade.quarteis.some(q => q.nome.toLowerCase().includes(termo));
+                if (!matchText) return false;
+
+                // 2. Tipo (Se nenhum filtro selecionado, mostra tudo)
+                const hasAnyFilter = Object.values(activeFilters).some(v => v);
+                if (!hasAnyFilter) return true;
+
+                const vtrsStr = cidade.quarteis.map(q => q.viaturas).join(", ").toUpperCase();
+
+                if (activeFilters.amb && (vtrsStr.includes("AA") || vtrsStr.includes("SAMU"))) return true;
+                if (activeFilters.fire && (vtrsStr.includes("ABT") || vtrsStr.includes("ATF"))) return true;
+                if (activeFilters.rescue && vtrsStr.includes("ABS")) return true;
+                if (activeFilters.boat && (vtrsStr.includes("MAS") || vtrsStr.includes("LBS") || vtrsStr.includes("BAS") || vtrsStr.includes("BIS"))) return true;
+                if (activeFilters.spec && (vtrsStr.includes("CT") || vtrsStr.includes("APM") || vtrsStr.includes("ATP"))) return true;
+                if (activeFilters.drone && (vtrsStr.includes("RPA") || vtrsStr.includes("MAVIC") || vtrsStr.includes("MATRICE") || vtrsStr.includes("DRONE"))) return true;
+                if (activeFilters.k9 && (vtrsStr.includes("K9") || vtrsStr.includes("CÃO") || vtrsStr.includes("CINOTÉCNICO"))) return true;
+                if (activeFilters.pgv && (vtrsStr.includes("PGV") || vtrsStr.includes("POSTO"))) return true;
+
+                return false;
+            });
+
+            // Ordenação
+            cidadesFiltradas.sort((a, b) => {
+                if (sortMode === 'efetivo_asc') return a.totalEfetivo - b.totalEfetivo;
+                if (sortMode === 'efetivo_desc') return b.totalEfetivo - a.totalEfetivo;
+                return a.nome.localeCompare(b.nome); // Padrão
+            });
+
+            // Renderização
+            let html = "";
+            cidadesFiltradas.forEach(cidade => {
+                let rows = "";
+                cidade.quarteis.forEach(q => {
+                    rows += `
+                        <div class="quartel-row">
+                            <span class="q-name">${q.nome}</span>
+                            <div class="q-details">
+                                <span class="q-efetivo-mini" title="Efetivo neste quartel">👤 ${q.efetivo}</span>
+                                <div class="chips-wrapper">${gerarChipsViaturas(q.viaturas)}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const stClass = getStatusClass(cidade.totalEfetivo);
+                const isCrit = cidade.totalEfetivo < 3 ? 'is-critical' : '';
+                const badgeCrit = cidade.totalEfetivo < 3 ? 'crit' : '';
+                const mapQuery = encodeURIComponent(`${cidade.nome} Corpo de Bombeiros`);
+
+                html += `
+                    <div class="city-card ${isCrit}">
+                        <div class="city-status-bar ${stClass}"></div>
+                        <div class="card-body">
+                            <div class="card-header">
+                                <div class="city-title-group">
+                                    <div class="city-title">${cidade.nome}</div>
+                                    <div class="city-meta">${cidade.quarteis.length} Base(s) Operacional(is)</div>
+                                </div>
+                                <div class="efetivo-badge ${badgeCrit}">
+                                    👤 ${cidade.totalEfetivo}
+                                </div>
+                            </div>
+
+                            ${rows}
+
+                            <div style="margin-top: 10px; text-align: right;">
+                                <a href="https://www.google.com/maps/search/?api=1&query=${mapQuery}" target="_blank" rel="noopener noreferrer" class="map-link" title="Ver no Mapa">
+                                    📍 Localização
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (listaCidadesDiv) listaCidadesDiv.innerHTML = html;
+            if (semResultadosDiv) semResultadosDiv.style.display = cidadesFiltradas.length === 0 ? 'block' : 'none';
+
+            atualizarEstatisticas(cidadesFiltradas);
+        }
+
+        // Função de verificação de login
+        function checkLogin() {
+            const input = document.getElementById('passwordInput');
+            const errorMsg = document.getElementById('loginError');
+            const overlay = document.getElementById('loginOverlay');
+            const mainContent = document.getElementById('mainContent');
+
+            if (!input || !errorMsg || !overlay || !mainContent) return;
+
+            if (input.value === LOGIN_CONFIG.password) {
+                overlay.style.display = 'none';
+                mainContent.style.display = 'block';
+                errorMsg.style.display = 'none';
+
+                renderizarCidades();
+            } else {
+                errorMsg.style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function syncToggleClasses() {
+            document.querySelectorAll('.toggle-btn').forEach(label => {
+                const input = label.querySelector('input');
+                if (!input) return;
+                label.classList.toggle('active', input.checked);
+            });
+        }
+
+        // ==========================================
+        // Helpers (Definidos no final ou acessíveis globalmente)
+        // ==========================================
+        function getVtrType(vtrName) {
+            const prefixo = vtrName.substring(0, 2).toUpperCase();
+            const prefixo3 = vtrName.substring(0, 3).toUpperCase();
+            const vtrLower = vtrName.toLowerCase();
+
+            if (vtrLower.includes('k9') || vtrLower.includes('cão') || vtrLower.includes('cinotécnico')) return 'k9';
+            if (vtrLower.includes('rpa') || vtrLower.includes('drone') || vtrLower.includes('mavic') || vtrLower.includes('matrice')) return 'drone';
+            if (vtrLower.includes('pgv') || vtrLower.includes('posto')) return 'pgv';
+
+            if (prefixo3 === "MAS" || prefixo3 === "LBS" || prefixo3 === "BAS" || prefixo3 === "BIS") return 'boat';
+            if (prefixo === "AA" || prefixo === "SI" || vtrName.includes("SAMU")) return 'amb';
+            if (prefixo3 === "ABT" || prefixo3 === "ATF") return 'fire';
+
+            // CORREÇÃO: ATP removido de 'special' (Apoio Pesado)
+            if (prefixo === "CT" || prefixo3 === "APM") return 'special';
+
+            if (prefixo3 === "ABS") return 'rescue';
+
+            // ATP cai aqui no padrão 'admin' (Cinza)
+            return 'admin';
+        }
+
+        function gerarChipsViaturas(viaturasStr) {
+            if (!viaturasStr || viaturasStr === "N/A") return "";
+            const listaVtrs = viaturasStr.split(',').map(v => v.trim()).filter(v => v.length > 0);
+            const unicos = [...new Set(listaVtrs)];
+            let html = "";
+            unicos.forEach(vtr => {
+                const type = getVtrType(vtr);
+                const classeCor = `bg-${type}`;
+                let displayVtr = vtr;
+                if (type === 'special') displayVtr = `🚜 ${vtr}`;
+                if (type === 'drone') displayVtr = `🚁 ${vtr}`;
+                if (type === 'k9') displayVtr = `🐕 ${vtr}`;
+                if (type === 'pgv') displayVtr = `🏊 ${vtr}`;
+                // CORREÇÃO: Adicionado ícone para admin/ATP para fácil identificação
+                if (type === 'admin') displayVtr = `🚗 ${vtr}`;
+
+                html += `<span class="vtr-chip ${classeCor}">${displayVtr}</span>`;
+            });
+            return html;
+        }
+
+        function getStatusClass(efetivo) {
+            if (efetivo >= 5) return "st-ok";
+            if (efetivo >= 3) return "st-warn";
+            return "st-crit";
+        }
+
+        function atualizarEstatisticas(cidadesFiltradas) {
+            let totEfetivo = 0;
+            let cAmb = 0, cFire = 0, cRescue = 0, cSpec = 0, cBoat = 0, cDrone = 0, cK9 = 0, cPGV = 0;
+            let critCities = 0;
+
+            cidadesFiltradas.forEach(city => {
+                totEfetivo += city.totalEfetivo;
+                if (city.totalEfetivo < 3) critCities++;
+                const vtrsCity = new Set();
+                city.quarteis.forEach(q => {
+                    if (q.viaturas && q.viaturas !== "N/A") {
+                        q.viaturas.split(',').forEach(v => vtrsCity.add(v.trim()));
+                    }
+                });
+                vtrsCity.forEach(v => {
+                    const t = getVtrType(v);
+                    if (t === 'amb') cAmb++;
+                    else if (t === 'fire') cFire++;
+                    else if (t === 'rescue') cRescue++;
+                    else if (t === 'special') cSpec++;
+                    else if (t === 'boat') cBoat++;
+                    else if (t === 'drone') cDrone++;
+                    else if (t === 'k9') cK9++;
+                    else if (t === 'pgv') cPGV++;
+                });
+            });
+
+            // Elementos DOM para stats
+            const s_total = document.getElementById('totalEfetivo');
+            const s_amb = document.getElementById('countAmb');
+            const s_fire = document.getElementById('countFire');
+            const s_rescue = document.getElementById('countRescue');
+            const s_spec = document.getElementById('countSpecial');
+            const s_boat = document.getElementById('countBoat');
+            const s_drone = document.getElementById('countDrone');
+            const s_k9 = document.getElementById('countK9');
+            const s_pgv = document.getElementById('countPGV');
+            const s_critAlert = document.getElementById('criticalAlert');
+            const s_critCount = document.getElementById('criticalCount');
+            const s_totalCities = document.getElementById('totalCitiesDisplay');
+
+            if (s_total) s_total.textContent = totEfetivo;
+            if (s_amb) s_amb.textContent = cAmb;
+            if (s_fire) s_fire.textContent = cFire;
+            if (s_rescue) s_rescue.textContent = cRescue;
+            if (s_spec) s_spec.textContent = cSpec;
+            if (s_boat) s_boat.textContent = cBoat;
+            if (s_drone) s_drone.textContent = cDrone;
+            if (s_k9) s_k9.textContent = cK9;
+            if (s_pgv) s_pgv.textContent = cPGV;
+
+            if (s_critAlert) {
+                if (s_totalCities) s_totalCities.textContent = cidadesFiltradas.length;
+                if (critCities > 0) {
+                    s_critAlert.style.display = "flex";
+                    if (s_critCount) s_critCount.textContent = critCities;
+                } else {
+                    s_critAlert.style.display = "none";
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTheme();
+
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    checkLogin();
+                });
+            }
+
+            const toggleThemeButton = document.getElementById('toggleThemeButton');
+            if (toggleThemeButton) {
+                toggleThemeButton.addEventListener('click', () => toggleDarkMode());
+            }
+
+            const filtroInput = document.getElementById('filtroCidade');
+            const sortSelect = document.getElementById('sortSelect');
+            const filters = {
+                amb: document.getElementById('filterAmb'),
+                fire: document.getElementById('filterFire'),
+                rescue: document.getElementById('filterRescue'),
+                boat: document.getElementById('filterBoat'),
+                spec: document.getElementById('filterSpecial'),
+                drone: document.getElementById('filterDrone'),
+                k9: document.getElementById('filterK9'),
+                pgv: document.getElementById('filterPGV')
+            };
+
+            if (filtroInput) filtroInput.addEventListener('input', renderizarCidades);
+            if (sortSelect) sortSelect.addEventListener('change', renderizarCidades);
+
+            Object.values(filters).forEach(filter => {
+                if (!filter) return;
+                filter.addEventListener('change', () => {
+                    syncToggleClasses();
+                    renderizarCidades();
+                });
+            });
+
+            syncToggleClasses();
+        });
+    </script>
+</body>
 </html>
